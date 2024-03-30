@@ -25,21 +25,16 @@ jobs:
       - name: Grant execute permission for Gradlew
         run: chmod +x gradlew
 
-      - name: Upload assets to releases
-        run: ./gradlew build
-
       - name: Get previous tag
         run: echo "previous_tag=$(git rev-parse $(git describe --tags --abbrev=0 --exclude *-dev) 2>/dev/null || echo '')" >> $GITHUB_ENV
 
       - name: Build Changelog
         id: build_changelog
-        uses: metcalfc/changelog-generator@v4.1.0
+        uses: metcalfc/changelog-generator@v4.2.0
         if: env.previous_tag
         with:
           myToken: ${{ secrets.GITHUB_TOKEN }}
-          head-ref: ${{ github.ref }}
           base-ref: ${{ env.previous_tag }}
-          fetch: false
 
       - name: Read value from Properties-file
         id: read_property
@@ -48,8 +43,14 @@ jobs:
           path: './gradle.properties'
           properties: 'mod_version minecraft_version'
 
+      - name: Upload assets to releases
+        run: ./gradlew build
+        env:
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+
       - name: Publish Forge to Modrinth & CurseForge
-        uses: Kir-Antipov/mc-publish@v3.3
+        uses: Kir-Antipov/mc-publish@v3.3.0
         with:
           modrinth-id: Dc4g4seU
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
@@ -59,9 +60,8 @@ jobs:
 
           files: |
             forge/build/libs/!(*-@(dev|sources|javadoc|shadow)).jar
-            forge/build/libs/*-@(dev|sources|javadoc).jar
 
-          name: Online Emotes ${{ steps.read_property.outputs.mod_version }} for ${{ steps.read_property.outputs.minecraft_version }} (Forge)
+          name: "[NeoForge ${{ steps.read_property.outputs.minecraft_version }}] v${{ steps.read_property.outputs.mod_version }}"
 
           changelog: ${{steps.build_changelog.outputs.changelog}}
 
@@ -69,32 +69,31 @@ jobs:
 
           loaders: |
             neoforge
-            forge
 
           game-versions: |
-            >=1.18.2 <=${{ steps.read_property.outputs.minecraft_version }}
-          
+            ${{ steps.read_property.outputs.minecraft_version }}
+
           dependencies: |
-            emotecraft{modrinth:pZ2wrerK}{curseforge:403422}
-            cloth-config
+            recs(optional){modrinth:VbyJLvvb}{curseforge:457570}
 
           java: |
             17
 
       - name: Publish Fabric to Modrinth & CurseForge
-        uses: Kir-Antipov/mc-publish@v3.3
+        uses: Kir-Antipov/mc-publish@v3.3.0
         with:
           modrinth-id: Dc4g4seU
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
 
           curseforge-id: 868230
+          curseforge-id: 833233
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
           
+
           files: |
             fabric/build/libs/!(*-@(dev|sources|javadoc|shadow)).jar
-            fabric/build/libs/*-@(dev|sources|javadoc).jar
 
-          name: Online Emotes ${{ steps.read_property.outputs.mod_version }} for ${{ steps.read_property.outputs.minecraft_version }} (Fabric/Quilt)
+          name: "[Fabric ${{ steps.read_property.outputs.minecraft_version }}] v${{ steps.read_property.outputs.mod_version }}"
 
           changelog: ${{steps.build_changelog.outputs.changelog}}
 
@@ -102,27 +101,30 @@ jobs:
 
           loaders: |
             fabric
-            quilt
 
           game-versions: |
-            >=1.18.2 <=${{ steps.read_property.outputs.minecraft_version }}
-          
+            ${{ steps.read_property.outputs.minecraft_version }}
+
           dependencies: |
-            emotecraft{modrinth:pZ2wrerK}{curseforge:397809}
-            fabric-api
             cloth-config
-            modmenu(recommended)
+            modmenu(optional)
 
           java: |
             17
 
-      - name: Create Release
-        uses: "marvinpinto/action-automatic-releases@latest"
+      - name: Publish Fabric & Forge to Github
+        uses: Kir-Antipov/mc-publish@v3.3.0
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "${{ steps.read_property.outputs.minecraft_version }}-${{ steps.read_property.outputs.mod_version }}"
-          prerelease: false
-          title: "Online Emotes ${{ steps.read_property.outputs.mod_version }} for ${{ steps.read_property.outputs.minecraft_version }}"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+          github-tag: "${{ steps.read_property.outputs.minecraft_version }}-${{ steps.read_property.outputs.mod_version }}"
+
           files: |
-            fabric/build/libs/*
-            forge/build/libs/*
+            forge/build/libs/!(*-@(dev|sources|javadoc|shadow)).jar
+            fabric/build/libs/!(*-@(dev|sources|javadoc|shadow)).jar
+
+          name: "[${{ steps.read_property.outputs.minecraft_version }}] v${{ steps.read_property.outputs.mod_version }}"
+
+          changelog: ${{steps.build_changelog.outputs.changelog}}
+
+          version-type: release
