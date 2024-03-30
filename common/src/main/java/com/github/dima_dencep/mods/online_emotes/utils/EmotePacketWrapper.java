@@ -12,8 +12,7 @@ package com.github.dima_dencep.mods.online_emotes.utils;
 
 import io.github.kosmx.emotes.main.config.ClientSerializer;
 import io.github.kosmx.emotes.server.config.Serializer;
-import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.Connection;
@@ -21,7 +20,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 public class EmotePacketWrapper {
@@ -33,11 +31,9 @@ public class EmotePacketWrapper {
     public UUID playerUUID;
     @Nullable
     public String serverAddress;
-    public boolean localizedMsg;
 
     public EmotePacketWrapper(byte[] emotePacket) {
         this.emotePacket = emotePacket;
-        this.localizedMsg = true;
 
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null) {
@@ -55,10 +51,8 @@ public class EmotePacketWrapper {
         }
     }
 
-    public BinaryWebSocketFrame toWebSocketFrame() {
-        return new BinaryWebSocketFrame(Unpooled.wrappedBuffer(Serializer.serializer.toJson(this)
-                .getBytes(StandardCharsets.UTF_8)
-        ));
+    public TextWebSocketFrame toWebSocketFrame() {
+        return new TextWebSocketFrame(Serializer.serializer.toJson(this));
     }
 
     private static String getIP(SocketAddress address) {
