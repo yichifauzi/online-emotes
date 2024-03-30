@@ -86,9 +86,7 @@ jobs:
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
 
           curseforge-id: 868230
-          curseforge-id: 833233
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-          
 
           files: |
             fabric/build/libs/!(*-@(dev|sources|javadoc|shadow)).jar
