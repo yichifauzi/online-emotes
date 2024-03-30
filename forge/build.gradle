@@ -22,10 +22,10 @@ configurations {
 dependencies {
     neoForge "net.neoforged:neoforge:${rootProject.forge_version}"
 
-    modLocalRuntime "curse.maven:configured-457570:5105024"
+    modLocalRuntime "curse.maven:configured-457570:5105024" // 2.2.3
 
     modImplementation "dev.kosmx.player-anim:player-animation-lib-forge:${rootProject.playeranimator_version}"
-    modImplementation "io.github.kosmx.emotes:neoforge:${rootProject.emotecraft_version}:neoforge"
+    modImplementation "maven.modrinth:emotecraft:${rootProject.emotecraft_version}" // TODO neoforge
 
     implementation forgeRuntimeLibrary(include("io.netty:netty-codec-http:${rootProject.netty_version}"))
 

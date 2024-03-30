@@ -12,7 +12,7 @@ dependencies {
     // EmoteCraft
     modImplementation "dev.kosmx.player-anim:player-animation-lib:${rootProject.playeranimator_version}"
     modImplementation "dev.kosmx.player-anim:anim-core:${rootProject.playeranimator_version}"
-    modImplementation "io.github.kosmx.emotes:fabric:${rootProject.emotecraft_version}:fabric"
+    modImplementation "maven.modrinth:emotecraft:${rootProject.emotecraft_version}"
 
     implementation "io.netty:netty-codec-http:${rootProject.netty_version}"
 }

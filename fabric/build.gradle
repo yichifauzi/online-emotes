@@ -31,7 +31,7 @@ dependencies {
     }
 
     modImplementation "dev.kosmx.player-anim:player-animation-lib-fabric:${rootProject.playeranimator_version}"
-    modImplementation "io.github.kosmx.emotes:fabric:${rootProject.emotecraft_version}:fabric"
+    modImplementation "maven.modrinth:emotecraft:${rootProject.emotecraft_version}"
 
     include implementation("io.netty:netty-codec-http:${rootProject.netty_version}")
 
