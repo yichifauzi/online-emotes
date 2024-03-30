@@ -74,6 +74,7 @@ jobs:
             ${{ steps.read_property.outputs.minecraft_version }}
 
           dependencies: |
+            emotecraft{modrinth:pZ2wrerK}{curseforge:403422}
             recs(optional){modrinth:VbyJLvvb}{curseforge:457570}
 
           java: |
@@ -104,6 +105,8 @@ jobs:
             ${{ steps.read_property.outputs.minecraft_version }}
 
           dependencies: |
+            emotecraft{modrinth:pZ2wrerK}{curseforge:397809}
+            fabric-api
             cloth-config
             modmenu(optional)
 
