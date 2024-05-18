@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 
 @ChannelHandler.Sharable
 public class OnlineNetworkInstance extends AbstractNetworkInstance {
-    private static final URI URI_ADDRESS = URI.create("wss://api.redlance.org/websockets/online-emotes");
+    private static final URI URI_ADDRESS = URI.create("wss://api.redlance.org:443/websockets/online-emotes");
 
     public final Bootstrap bootstrap = new Bootstrap();
     private ScheduledFuture<?> reconnectingFuture;
@@ -105,11 +105,11 @@ public class OnlineNetworkInstance extends AbstractNetworkInstance {
                     if (e.isSuccess()) {
                         sendOnlineEmotesConfig();
                     } else {
-                        OnlineEmotes.LOGGER.error(e.cause());
+                        OnlineEmotes.LOGGER.error("Failed to connect!", e.cause());
                     }
                 });
             } else {
-                OnlineEmotes.LOGGER.error(l.cause());
+                OnlineEmotes.LOGGER.error("Failed to connect!", l.cause());
             }
         });
     }

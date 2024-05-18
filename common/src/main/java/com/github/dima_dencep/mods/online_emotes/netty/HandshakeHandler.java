@@ -52,7 +52,7 @@ public class HandshakeHandler extends SimpleChannelInboundHandler<FullHttpRespon
         if (!handshakeFuture.isDone()) {
             handshakeFuture.setFailure(cause);
         } else {
-            OnlineEmotes.LOGGER.error("WebSocket exception:", cause);
+            OnlineEmotes.LOGGER.error("WebSocket exception!", cause);
         }
         ctx.close();
     }
