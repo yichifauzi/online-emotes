@@ -5,6 +5,7 @@ on:
     branches:
       - '**/stable'
       - '**/backport'
+      - '**/snapshot'
 
 jobs:
   build:
@@ -26,7 +27,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Get previous tag
-        run: echo "previous_tag=$(git rev-parse $(git describe --tags --abbrev=0 --exclude *-dev) 2>/dev/null || echo '')" >> $GITHUB_ENV
+        run: echo "previous_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo '')" >> $GITHUB_ENV
 
       - name: Build Changelog
         id: build_changelog
@@ -65,11 +66,13 @@ jobs:
 
           changelog: ${{steps.build_changelog.outputs.changelog}}
 
+          version: "${{ steps.read_property.outputs.mod_version }}+mc${{ steps.read_property.outputs.minecraft_version }}-forge"
           version-type: release
 
           loaders: |
             neoforge
 
+          game-version-filter: none
           game-versions: |
             ${{ steps.read_property.outputs.minecraft_version }}
 
@@ -96,11 +99,13 @@ jobs:
 
           changelog: ${{steps.build_changelog.outputs.changelog}}
 
+          version: "${{ steps.read_property.outputs.mod_version }}+mc${{ steps.read_property.outputs.minecraft_version }}-fabric"
           version-type: release
 
           loaders: |
             fabric
 
+          game-version-filter: none
           game-versions: |
             ${{ steps.read_property.outputs.minecraft_version }}
 

@@ -1,5 +1,5 @@
 plugins {
-    id "com.github.johnrengelman.shadow"
+    id "io.github.goooler.shadow"
 }
 
 architectury {
@@ -13,7 +13,7 @@ loom {
 
 configurations {
     common
-    shadowCommon // Don't use shadow from the shadow plugin since it *excludes* files.
+    shadowCommon
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentNeoForge.extendsFrom common
@@ -22,8 +22,6 @@ configurations {
 dependencies {
     neoForge "net.neoforged:neoforge:${rootProject.forge_version}"
 
-    modLocalRuntime "curse.maven:configured-457570:5105024" // 2.2.3
-
     modImplementation "dev.kosmx.player-anim:player-animation-lib-forge:${rootProject.playeranimator_version}"
     modImplementation "maven.modrinth:emotecraft:${rootProject.emotecraft_version}" // TODO neoforge
 
@@ -31,14 +29,6 @@ dependencies {
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
-}
-
-processResources {
-    inputs.property "version", project.version
-
-    filesMatching("META-INF/mods.toml") {
-        expand "version": project.version
-    }
 }
 
 shadowJar {
