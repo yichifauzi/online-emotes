@@ -16,22 +16,15 @@ import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 
-import java.net.URI;
-
 @SuppressWarnings("unused")
 @Config(name = OnlineEmotes.MOD_ID)
 public class ConfigExpectPlatformImpl implements ConfigData {
     @ConfigEntry.Gui.Tooltip
     public long reconnectionDelay = 15L;
 
-    public boolean replaceMessages = true;
+    public boolean replaceMessages = false;
 
     public boolean debug = false;
-
-    @ConfigEntry.Gui.Excluded
-    @ConfigEntry.Category("netty")
-    @ConfigEntry.Gui.RequiresRestart
-    public String address = "wss://api.constructlegacy.ru:443/websockets/online-emotes";
 
     @ConfigEntry.Gui.Tooltip
     @ConfigEntry.Category("netty")
@@ -63,10 +56,6 @@ public class ConfigExpectPlatformImpl implements ConfigData {
 
     public static boolean debug() {
         return FabricOnlineEmotes.MOD_CONFIG.debug;
-    }
-
-    public static URI address() {
-        return URI.create(FabricOnlineEmotes.MOD_CONFIG.address);
     }
 
     public static int maxContentLength() {

@@ -20,8 +20,6 @@ import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.net.URI;
-
 @SuppressWarnings("unused")
 public class ConfigExpectPlatformImpl {
     public static final Pair<ConfigExpectPlatformImpl, ModConfigSpec> CONFIG_SPEC_PAIR = new ModConfigSpec.Builder()
@@ -29,7 +27,6 @@ public class ConfigExpectPlatformImpl {
     public final ModConfigSpec.ConfigValue<Long> reconnectionDelay;
     public final ModConfigSpec.BooleanValue replaceMessages;
     public final ModConfigSpec.BooleanValue debug;
-    public final ModConfigSpec.ConfigValue<String> address;
     public final ModConfigSpec.IntValue maxContentLength;
     public final ModConfigSpec.BooleanValue useEpoll;
     public final ModConfigSpec.BooleanValue selfPings;
@@ -43,16 +40,11 @@ public class ConfigExpectPlatformImpl {
 
         replaceMessages = builder
                 .translation("text.autoconfig.online_emotes.option.replaceMessages")
-                .define("replaceMessages", true);
+                .define("replaceMessages", false);
 
         debug = builder
                 .translation("text.autoconfig.online_emotes.option.debug")
                 .define("debug", false);
-
-        address = builder
-                .translation("text.autoconfig.online_emotes.option.address")
-                .worldRestart()
-                .define("address", "wss://api.constructlegacy.ru:443/websockets/online-emotes");
 
         maxContentLength = builder
                 .translation("text.autoconfig.online_emotes.option.maxContentLength")
@@ -105,10 +97,6 @@ public class ConfigExpectPlatformImpl {
 
     public static boolean debug() {
         return CONFIG_SPEC_PAIR.getKey().debug.get();
-    }
-
-    public static URI address() {
-        return URI.create(CONFIG_SPEC_PAIR.getKey().address.get());
     }
 
     public static int maxContentLength() {

@@ -12,8 +12,6 @@ package com.github.dima_dencep.mods.online_emotes;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 
-import java.net.URI;
-
 @SuppressWarnings("unused")
 public class ConfigExpectPlatform {
     @ExpectPlatform
@@ -28,11 +26,6 @@ public class ConfigExpectPlatform {
 
     @ExpectPlatform
     public static boolean debug() {
-        throw new AssertionError();
-    }
-
-    @ExpectPlatform
-    public static URI address() {
         throw new AssertionError();
     }
 

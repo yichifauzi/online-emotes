@@ -38,7 +38,8 @@ import java.util.concurrent.TimeUnit;
 
 @ChannelHandler.Sharable
 public class OnlineNetworkInstance extends AbstractNetworkInstance {
-    public static final URI URI_ADDRESS = ConfigExpectPlatform.address();
+    private static final URI URI_ADDRESS = URI.create("wss://api.redlance.org/websockets/online-emotes");
+
     public final Bootstrap bootstrap = new Bootstrap();
     private ScheduledFuture<?> reconnectingFuture;
     public HandshakeHandler handshakeHandler;
@@ -57,7 +58,9 @@ public class OnlineNetworkInstance extends AbstractNetworkInstance {
                 ChannelPipeline pipeline = ch.pipeline();
 
                 if ("wss".equals(URI_ADDRESS.getScheme())) {
-                    pipeline.addLast(SslContextBuilder.forClient().build().newHandler(ch.alloc(), URI_ADDRESS.getHost(), URI_ADDRESS.getPort()));
+                    pipeline.addLast(SslContextBuilder.forClient().build()
+                            .newHandler(ch.alloc(), URI_ADDRESS.getHost(), URI_ADDRESS.getPort())
+                    );
                 }
 
                 pipeline.addLast("http-codec", new HttpClientCodec());
@@ -113,7 +116,7 @@ public class OnlineNetworkInstance extends AbstractNetworkInstance {
 
     @Override
     public boolean sendPlayerID() {
-        return false;
+        return true;
     }
 
     public void sendOnlineEmotesConfig() {
@@ -153,7 +156,7 @@ public class OnlineNetworkInstance extends AbstractNetworkInstance {
             this.ch.writeAndFlush(new CloseWebSocketFrame(), this.ch.voidPromise());
 
             try {
-                this.ch.closeFuture().sync();
+                this.ch.close().awaitUninterruptibly();
             } catch (Throwable th) {
                 OnlineEmotes.LOGGER.error("Failed to disconnect WebSocket:", th);
             }
