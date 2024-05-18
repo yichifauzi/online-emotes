@@ -59,6 +59,15 @@ public class FancyToast implements Toast {
         return timeSinceLastVisible - this.lastChanged < (double) 1500L * manager.getNotificationDisplayTimeMultiplier() ? Visibility.SHOW : Visibility.HIDE;
     }
 
+    @Override
+    public int width() {
+        if (this.msg == null) {
+            return Toast.super.width();
+        }
+
+        return Minecraft.getInstance().font.width(this.msg) + 38;
+    }
+
     public static void sendMessage(Component title, Component description) {
         sendMessage(false, false, false, title, description);
     }
