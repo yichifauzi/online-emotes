@@ -22,10 +22,10 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "com.github.dima_dencep.mods.online_emotes.fabric.FabricOnlineEmotes"
+      "org.redlance.dima_dencep.mods.online_emotes.fabric.FabricOnlineEmotes"
     ],
     "modmenu": [
-      "com.github.dima_dencep.mods.online_emotes.fabric.integrations.ModMenuImpl"
+      "org.redlance.dima_dencep.mods.online_emotes.fabric.integrations.ModMenuImpl"
     ]
   },
   "mixins": [
