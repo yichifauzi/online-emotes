@@ -12,7 +12,6 @@ package com.github.dima_dencep.mods.online_emotes.utils;
 
 import io.github.kosmx.emotes.main.config.ClientSerializer;
 import io.github.kosmx.emotes.server.config.Serializer;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.Connection;
@@ -51,8 +50,8 @@ public class EmotePacketWrapper {
         }
     }
 
-    public TextWebSocketFrame toWebSocketFrame() {
-        return new TextWebSocketFrame(Serializer.serializer.toJson(this));
+    public String serializeToJson() {
+        return Serializer.serializer.toJson(this);
     }
 
     private static String getIP(SocketAddress address) {

@@ -11,14 +11,9 @@
 package com.github.dima_dencep.mods.online_emotes.utils;
 
 import com.github.dima_dencep.mods.online_emotes.ConfigExpectPlatform;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.epoll.EpollSocketChannel;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,19 +26,5 @@ public class NettyObjectFactory {
         return thread;
     };
 
-    public static EventLoopGroup newEventLoopGroup() {
-        if (Epoll.isAvailable() && ConfigExpectPlatform.useEpoll()) {
-            return new EpollEventLoopGroup(ConfigExpectPlatform.threads(), threadFactory);
-        } else {
-            return new NioEventLoopGroup(ConfigExpectPlatform.threads(), threadFactory);
-        }
-    }
-
-    public static Class<? extends SocketChannel> getSocketChannel() {
-        if (Epoll.isAvailable() && ConfigExpectPlatform.useEpoll()) {
-            return EpollSocketChannel.class;
-        } else {
-            return NioSocketChannel.class;
-        }
-    }
+    public static final ScheduledExecutorService EXECUTOR_SERVICE = Executors.newScheduledThreadPool(ConfigExpectPlatform.threads(), threadFactory);
 }

@@ -22,7 +22,9 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 public class FancyToast implements Toast {
-    private static final ResourceLocation IDENTIFIER = new ResourceLocation("online-emotes", "icon.png");
+    public static final ResourceLocation ICON = new ResourceLocation("online-emotes", "icon.png");
+    public static final Component TITLE = Component.translatable("text.autoconfig.online_emotes.title");
+
     private static final FancyToast FANCY_TOAST = new FancyToast();
 
     private boolean changed;
@@ -43,7 +45,7 @@ public class FancyToast implements Toast {
 
         guiGraphics.fill(0, 0, width(), height() - 1, -1207959552);
         guiGraphics.fill(0, height() - 1, width(), height(), 0xFFfc1a47);
-        guiGraphics.blit(IDENTIFIER, 8, 8, 0.0F, 0.0F, 16, 16, 16, 16);
+        guiGraphics.blit(ICON, 8, 8, 0.0F, 0.0F, 16, 16, 16, 16);
 
         Font textRenderer = manager.getMinecraft().font;
 
@@ -69,7 +71,7 @@ public class FancyToast implements Toast {
         if (debug && !ConfigExpectPlatform.debug()) return;
 
         if (title == null)
-            title = OnlineEmotes.TITLE;
+            title = TITLE;
 
         ToastComponent toastManager = Minecraft.getInstance().getToasts();
 

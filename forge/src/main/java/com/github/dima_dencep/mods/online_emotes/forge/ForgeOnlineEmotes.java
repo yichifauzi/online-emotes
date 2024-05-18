@@ -13,30 +13,14 @@ package com.github.dima_dencep.mods.online_emotes.forge;
 import com.github.dima_dencep.mods.online_emotes.OnlineEmotes;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 
 @Mod(OnlineEmotes.MOD_ID)
 public class ForgeOnlineEmotes extends OnlineEmotes {
     public ForgeOnlineEmotes() {
-        NeoForge.EVENT_BUS.register(this);
-
         super.onInitializeClient();
-    }
 
-    @SubscribeEvent
-    public void onJoin(ClientPlayerNetworkEvent.LoggingIn event) {
-        if (proxy.isActive()) {
-            proxy.sendOnlineEmotesConfig();
-        } else {
-            proxy.connect();
-        }
-    }
-
-    @SubscribeEvent
-    public void onExit(ClientPlayerNetworkEvent.LoggingOut event) {
-        if (proxy.isActive()) {
-            proxy.disconnect();
-        }
+        NeoForge.EVENT_BUS.addListener(ClientPlayerNetworkEvent.LoggingIn.class, event -> proxy.connect());
+        NeoForge.EVENT_BUS.addListener(ClientPlayerNetworkEvent.LoggingOut.class, event -> proxy.disconnect());
     }
 }

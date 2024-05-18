@@ -10,23 +10,17 @@
 
 package com.github.dima_dencep.mods.online_emotes;
 
-import com.github.dima_dencep.mods.online_emotes.network.OnlineNetworkInstance;
+import com.github.dima_dencep.mods.online_emotes.websocket.OnlineNetworkInstance;
 import io.github.kosmx.emotes.api.proxy.EmotesProxyManager;
-import net.minecraft.network.chat.Component;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class OnlineEmotes {
-    public static final Component TITLE = Component.translatable("text.autoconfig.online_emotes.title");
     public static final Logger LOGGER = LogManager.getLogger(OnlineEmotes.MOD_ID);
     public static final String MOD_ID = "online_emotes";
     public static OnlineNetworkInstance proxy;
 
     public void onInitializeClient() {
         EmotesProxyManager.registerProxyInstance(OnlineEmotes.proxy = new OnlineNetworkInstance());
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() ->
-                OnlineEmotes.proxy.bootstrap.config().group().shutdownGracefully()
-        ));
     }
 }
