@@ -7,8 +7,8 @@ pluginManagement {
     }
 }
 
+rootProject.name = "online-emotes"
+
 include("common")
 include("fabric")
 include("forge")
-
-rootProject.name = "online-emotes"
