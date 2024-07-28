@@ -26,7 +26,7 @@ public class ConfigExpectPlatformImpl {
     public final ModConfigSpec.ConfigValue<Long> reconnectionDelay;
     public final ModConfigSpec.BooleanValue replaceMessages;
     public final ModConfigSpec.BooleanValue debug;
-    public final ModConfigSpec.ConfigValue<Integer> threads;
+    public final ModConfigSpec.IntValue threads;
 
     public ConfigExpectPlatformImpl(ModConfigSpec.Builder builder) {
         reconnectionDelay = builder
@@ -45,7 +45,7 @@ public class ConfigExpectPlatformImpl {
         threads = builder
                 .translation("text.autoconfig.online_emotes.option.threads")
                 .worldRestart()
-                .define("threads", 1);
+                .defineInRange("threads", 2, 1, Integer.MAX_VALUE);
     }
 
     static { // Early loading for config

@@ -27,7 +27,8 @@ public class ConfigExpectPlatformImpl implements ConfigData {
 
     @ConfigEntry.Category("websocket")
     @ConfigEntry.Gui.RequiresRestart
-    public int threads = 1;
+    @ConfigEntry.BoundedDiscrete(min = 1, max = Integer.MAX_VALUE)
+    public int threads = 2;
 
     public static long reconnectionDelay() {
         return FabricOnlineEmotes.MOD_CONFIG.reconnectionDelay;

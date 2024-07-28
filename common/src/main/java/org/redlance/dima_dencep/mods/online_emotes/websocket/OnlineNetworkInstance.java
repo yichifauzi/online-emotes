@@ -8,39 +8,44 @@
  *     https://spdx.org/licenses/OSL-3.0.txt
  */
 
-package com.github.dima_dencep.mods.online_emotes.websocket;
+package org.redlance.dima_dencep.mods.online_emotes.websocket;
 
-import com.github.dima_dencep.mods.online_emotes.ConfigExpectPlatform;
-import com.github.dima_dencep.mods.online_emotes.OnlineEmotes;
-import com.github.dima_dencep.mods.online_emotes.client.FancyToast;
-import com.github.dima_dencep.mods.online_emotes.utils.EmotePacketWrapper;
-import com.github.dima_dencep.mods.online_emotes.utils.NettyObjectFactory;
-import io.github.kosmx.emotes.PlatformTools;
+import org.redlance.dima_dencep.mods.online_emotes.ConfigExpectPlatform;
+import org.redlance.dima_dencep.mods.online_emotes.OnlineEmotes;
+import org.redlance.dima_dencep.mods.online_emotes.client.FancyToast;
 import io.github.kosmx.emotes.api.proxy.AbstractNetworkInstance;
 import io.github.kosmx.emotes.common.network.EmotePacket;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.WebSocket;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
 import java.time.Duration;
 import java.util.UUID;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class OnlineNetworkInstance extends AbstractNetworkInstance implements WebSocket.Listener {
-    public static final URI URI_ADDRESS = ConfigExpectPlatform.address();
-    private ScheduledFuture<?> reconnectingFuture;
+public class OnlineNetworkInstance extends AbstractNetworkInstance {
+    private static final ScheduledExecutorService EXECUTOR = Executors.newScheduledThreadPool(
+            Math.max(ConfigExpectPlatform.threads(), 1),
+
+            Thread.ofVirtual() // Requires java 21
+                    .name(OnlineEmotes.MOD_ID)
+                    .factory()
+    );
+
+    private static final URI URI_ADDRESS = URI.create("wss://api.redlance.org:443/websockets/online-emotes");
+    private static final WebSocketListener LISTENER = new WebSocketListener();
+
     private final WebSocket.Builder webSocketBuilder;
-    protected HttpClient httpClient;
-    protected WebSocket webSocket;
+    private final HttpClient httpClient;
+
+    private ScheduledFuture<?> reconnectingFuture;
+    private WebSocket webSocket;
 
     public OnlineNetworkInstance() {
         if (!"ws".equals(URI_ADDRESS.getScheme()) && !"wss".equals(URI_ADDRESS.getScheme())) {
@@ -48,43 +53,40 @@ public class OnlineNetworkInstance extends AbstractNetworkInstance implements We
         }
 
         this.httpClient = HttpClient.newBuilder()
-                .executor(NettyObjectFactory.EXECUTOR_SERVICE)
+                .executor(EXECUTOR)
                 // .sslContext()
                 .build();
 
-        this.webSocketBuilder = this.httpClient
-                .newWebSocketBuilder()
-                .connectTimeout(Duration.ofSeconds(ConfigExpectPlatform.reconnectionDelay()));
+        this.webSocketBuilder = this.httpClient.newWebSocketBuilder()
+                .connectTimeout(Duration.ofSeconds(
+                        ConfigExpectPlatform.reconnectionDelay()
+                ));
     }
 
     public void connect() {
         if (isActive()) {
-            OnlineEmotes.LOGGER.info("Aready connected!");
-
-            sendOnlineEmotesConfig();
-
+            OnlineEmotes.LOGGER.warn("WebSocket already connected!");
+            sendOnlineEmotesConfig(); // Reconfigure server
             return;
         }
 
-        this.webSocketBuilder.buildAsync(URI_ADDRESS, this).thenAccept((e) -> {
-            disconnectWebSocket();
+        this.webSocketBuilder.buildAsync(URI_ADDRESS, LISTENER).thenAccept((e) ->
+                this.webSocket = e
+        ).whenCompleteAsync((unused, throwable) -> {
+            if (throwable != null) {
+                OnlineEmotes.LOGGER.error("Failed to connect!", throwable);
+                startReconnector();
+                return;
+            }
 
-            this.webSocket = e;
-
-            startReconnecting();
-            sendOnlineEmotesConfig();
-        }).exceptionally((ex) -> {
-            OnlineEmotes.LOGGER.error("Failed to connect", ex);
-
-            startReconnecting();
-
-            return null;
-        });
+            sendOnlineEmotesConfig(); // Configure server
+            stopReconnector();
+        }, EXECUTOR);
     }
 
     @Override
     public boolean sendPlayerID() {
-        return false;
+        return true;
     }
 
     public void sendOnlineEmotesConfig() {
@@ -118,24 +120,10 @@ public class OnlineNetworkInstance extends AbstractNetworkInstance implements We
     }
 
     public void disconnectWebSocket() {
-        try {
-            if (this.reconnectingFuture != null && !this.reconnectingFuture.isCancelled()) {
-                OnlineEmotes.LOGGER.warn("What happened to the reconnector?");
+        this.webSocket.sendClose(WebSocket.NORMAL_CLOSURE, "")
+                .thenAcceptAsync(WebSocket::abort);
 
-                this.reconnectingFuture.cancel(true);
-                this.reconnectingFuture = null;
-            }
-        } catch (Throwable th) {
-            OnlineEmotes.LOGGER.error("Failed to stop reconnector:", th);
-        }
-
-        onClose(this.webSocket, WebSocket.NORMAL_CLOSURE, ""); // Display debug message
-
-        if (this.webSocket == null)
-            return;
-
-        this.webSocket.sendClose(WebSocket.NORMAL_CLOSURE, "");
-        this.webSocket.abort();
+        this.webSocket = null;
     }
 
     @Override
@@ -144,78 +132,26 @@ public class OnlineNetworkInstance extends AbstractNetworkInstance implements We
         super.disconnect();
     }
 
-    public void startReconnecting() {
-        if (this.reconnectingFuture != null)
+    protected void stopReconnector() {
+        if (this.reconnectingFuture == null) {
             return;
-
-        this.reconnectingFuture = NettyObjectFactory.EXECUTOR_SERVICE.scheduleAtFixedRate(() -> {
-
-            if (!isActive()) {
-                OnlineEmotes.LOGGER.info("Try (re)connecting...");
-                connect();
-            }
-
-        }, 0L, ConfigExpectPlatform.reconnectionDelay(), TimeUnit.SECONDS);
-    }
-
-    private static final Component DISCONNECTED = Component.translatable("online_emotes.messages.disconnected");
-    private static final Component CONNECTED = Component.translatable("online_emotes.messages.connected");
-
-    @Override
-    public void onOpen(WebSocket webSocket) {
-        FancyToast.sendMessage(true, false, this.reconnectingFuture != null, null, CONNECTED);
-
-        WebSocket.Listener.super.onOpen(webSocket);
-    }
-
-    @Override
-    public CompletionStage<?> onClose(WebSocket webSocket, int statusCode, String reason) {
-        FancyToast.sendMessage(true, this.reconnectingFuture != null, false, null, DISCONNECTED);
-
-        return WebSocket.Listener.super.onClose(webSocket, statusCode, reason);
-    }
-
-    @Override
-    public void onError(WebSocket webSocket, Throwable error) {
-        OnlineEmotes.LOGGER.error("WebSocket exception:", error);
-
-        WebSocket.Listener.super.onError(webSocket, error);
-    }
-
-    private final StringBuilder stringBuilder = new StringBuilder();
-
-    @Override
-    public CompletionStage<?> onText(WebSocket webSocket, CharSequence data, boolean last) {
-        this.stringBuilder.append(data);
-
-        if (last) {
-            String message = this.stringBuilder.toString();
-            this.stringBuilder.setLength(0);
-
-            FancyToast.sendMessage(null, PlatformTools.fromJson(message));
         }
 
-        return WebSocket.Listener.super.onText(webSocket, data, last);
+        OnlineEmotes.LOGGER.info("Reconnector stopped!");
+
+        this.reconnectingFuture.cancel(true);
+        this.reconnectingFuture = null;
     }
 
-    private final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    private final WritableByteChannel byteChannel = Channels.newChannel(this.byteArrayOutputStream);
-
-    @Override
-    public CompletionStage<?> onBinary(WebSocket webSocket, ByteBuffer data, boolean last) {
-        try {
-            this.byteChannel.write(data);
-        } catch (IOException e) {
-            OnlineEmotes.LOGGER.error("Failed to write!", e);
+    protected void startReconnector() {
+        if (this.reconnectingFuture != null) {
+            return;
         }
 
-        if (last) {
-            byte[] bytes = this.byteArrayOutputStream.toByteArray();
-            this.byteArrayOutputStream.reset();
+        OnlineEmotes.LOGGER.info("Reconnector started!");
 
-            receiveMessage(bytes);
-        }
-
-        return WebSocket.Listener.super.onBinary(webSocket, data, last);
+        this.reconnectingFuture = EXECUTOR.scheduleAtFixedRate(
+                this::connect, 0L, ConfigExpectPlatform.reconnectionDelay(), TimeUnit.SECONDS
+        );
     }
 }

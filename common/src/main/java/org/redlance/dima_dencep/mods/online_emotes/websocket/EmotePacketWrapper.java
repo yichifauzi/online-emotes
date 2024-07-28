@@ -8,7 +8,7 @@
  *     https://spdx.org/licenses/OSL-3.0.txt
  */
 
-package org.redlance.dima_dencep.mods.online_emotes.utils;
+package org.redlance.dima_dencep.mods.online_emotes.websocket;
 
 import io.github.kosmx.emotes.main.config.ClientSerializer;
 import io.github.kosmx.emotes.server.config.Serializer;

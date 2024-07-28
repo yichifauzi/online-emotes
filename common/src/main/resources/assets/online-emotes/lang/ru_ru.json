@@ -2,7 +2,7 @@
   "text.autoconfig.online_emotes.title": "Онлайн Эмоции",
 
   "text.autoconfig.online_emotes.category.default": "Главная",
-  "text.autoconfig.online_emotes.category.websocket": "Сокет",
+  "text.autoconfig.online_emotes.category.websocket": "Веб-Сокет",
 
   "text.autoconfig.online_emotes.option.reconnectionDelay.@Tooltip": "В секундах",
   "text.autoconfig.online_emotes.option.reconnectionDelay": "Задержка перед повторным подключением",
@@ -16,7 +16,7 @@
   "online_emotes.button.reconect": "Переподключить OnlineEmotes",
 
   "online_emotes.messages.connected": "Веб-сокет подключен!",
-  "online_emotes.messages.disconnected": "Веб-сокет отключен!",
+  "online_emotes.messages.disconnected": "Веб-сокет отключен: %s",
   "online_emotes.messages.internal.banned": "Вы были забанены по причине: %s! Если это ошибка, обратитесь в поддержку.",
   "online_emotes.messages.internal.restarting": "Сервер перезапускается...",
   "online_emotes.messages.internal.restarting-update": "Сервер перезапускается для обновления, убедитесь, что у вас установлена последняя версия мода!"
